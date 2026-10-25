@@ -4,7 +4,6 @@
 
 Data-driven reduced-order model for the two-dimensional incompressible cylinder wake at $Re=100$. The notebook compresses the streamwise velocity field with proper orthogonal decomposition (POD), trains an LSTM to forecast the POD coefficients, and reconstructs the full field from sparse point measurements.
 
-**Scope note:** Despite the `ROM_pod_spod` filename, the current notebook implements POD, not SPOD. It is a research and teaching prototype, not a CFD solver, a physics-informed neural network, or a production digital twin.
 
 ## Abstract
 
@@ -180,7 +179,6 @@ ROM/
 - The SVD sign of a mode is arbitrary; a mode may flip sign across runs or libraries. Reconstructions and error metrics are unaffected.
 - Exact metrics can vary slightly with hardware, TensorFlow version, and numerical libraries.
 - The repository version of the notebook has no stored outputs. Run it to regenerate the plots and `pod_lstm_forecast.gif`.
-- Dataset SHA-256: `99d9e1f9da7d2dff113ff2723373237b455e2de6c6747ac681846fe86fbba3d0`
 
 ## Limitations
 
