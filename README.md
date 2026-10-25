@@ -118,7 +118,7 @@ $$
 \frac{\lVert x_{\text{true}} - x_{\text{pred}} \rVert_2}{\lVert x_{\text{true}} \rVert_2}.
 $$
 
-The forecast degrades over the 4.0 s horizon. This is a baseline result; no hyperparameter search, sequence-to-sequence model, or uncertainty quantification is included.
+The forecast degrades over the 4.0 s horizon. This is a baseline result; no hyper-parameter search, sequence-to-sequence model, or uncertainty quantification is included.
 
 ### Sparse reconstruction with QR-pivoted sensors
 
@@ -216,22 +216,14 @@ ROM/
 - Random seeds are fixed at 42 for NumPy, Python `random`, and TensorFlow.
 - The SVD sign of a mode is arbitrary; a mode may flip sign across runs or libraries. Reconstructions and error metrics are unaffected.
 - Exact metrics can vary slightly with hardware, TensorFlow version, and numerical libraries.
-<<<<<<< HEAD
-- The repository version of the notebook has no stored outputs. Run it to regenerate `docs/*.png` and `docs/pod_lstm_forecast.gif`.
-- Dataset SHA-256: `99d9e1f9da7d2dff113ff2723373237b455e2de6c6747ac681846fe86fbba3d0`
-=======
-- The repository version of the notebook has no stored outputs. Run it to regenerate the plots and `pod_lstm_forecast.gif`.
->>>>>>> origin/main
 
 ## Limitations
 
-- Only the streamwise velocity component $u$ is modeled. The cross-stream velocity $v$ and pressure field are not used.
-- The LSTM is a small baseline trained on 150 sequences. It has no hyperparameter search, regularization study, or uncertainty estimate.
+- Only the stream-wise velocity component $u$ is modeled. The cross-stream velocity $v$ and pressure field are not used.
+- The LSTM is a small baseline trained on 150 sequences. It has no hyper-parameter search, regularization study, or uncertainty estimate.
 - Forecast error grows with horizon; the reported 12.84% mean error should not be interpreted as long-horizon accuracy.
 - Sparse reconstruction assumes a known POD basis, fixed sensor locations, and noise-free measurements.
 - QR pivoting is greedy and is not a global optimum.
-- SPOD is not implemented, despite the `ROM_pod_spod` filename.
-- The notebook is not a CFD solver, a PINN, or a digital twin.
 
 ## Future Work
 
@@ -240,7 +232,6 @@ ROM/
 3. Include the cross-stream velocity and pressure fields.
 4. Study robust sensor placement under measurement noise and sensor failure.
 5. Add hyperparameter sweeps and uncertainty quantification for the forecast.
-6. Refactor the notebook into reusable modules with tests and a pinned requirements file.
 
 ## References
 
