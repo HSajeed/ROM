@@ -28,6 +28,7 @@ random.seed(SEED)
 tf.random.set_seed(SEED)
 tf.keras.utils.set_random_seed(SEED)
 
+os.makedirs("docs", exist_ok=True)
 
 # Load the file
 data = scipy.io.loadmat('cylinder_nektar_wake.mat')
@@ -107,22 +108,26 @@ elif VT.shape[1] == 5000:
 else:
     raise ValueError("Could not find dimension 5000 in U or VT!")
 
-# Now we plot 'Modes' which is guaranteed to be (5000, ...)
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+for ax, mode_idx, title in zip(
+    axes,
+    [0, 1],
+    ["Mode 1 (mean-flow-like)", "Mode 2 (vortex shedding)"],
+):
+    sc = ax.scatter(
+        Coords[:, 0], Coords[:, 1],
+        c=Modes[:, mode_idx], cmap="RdBu_r", s=5,
+    )
+    fig.colorbar(sc, ax=ax)
+    ax.set_title(title)
+    ax.set_xlim([-1, 8])
+    ax.set_ylim([-3, 3])
+    ax.set_aspect("equal")
 
-# POD modes are energy-ranked. The labels below are interpretive.
-scat1 = ax1.scatter(Coords[:, 0], Coords[:, 1], c=Modes[:, 0], cmap='RdBu_r', s=5)
-fig.colorbar(scat1, ax=ax1)
-ax1.set_title("Mode 1 (Mean Flow)")
-ax1.set_xlim([-1, 8]); ax1.set_ylim([-3, 3])
-
-scat2 = ax2.scatter(Coords[:, 0], Coords[:, 1], c=Modes[:, 1], cmap='RdBu_r', s=5)
-fig.colorbar(scat2, ax=ax2)
-ax2.set_title("Mode 2 (Vortex Shedding)")
-ax2.set_xlim([-1, 8]); ax2.set_ylim([-3, 3])
-
+fig.suptitle(f"POD modes of the streamwise velocity field (r={r})", fontsize=14)
+fig.tight_layout()
+plt.savefig("docs/pod_modes.png", dpi=200, bbox_inches="tight")
 plt.show()
-
 
 # --- 3. LSTM TRAINING ---
 
@@ -161,11 +166,17 @@ history = model.fit(x_tr, y_tr, epochs=100, batch_size=16, verbose=1, validation
 print("Model Trained.")
 
 # Plot loss to check for overfitting
-plt.figure(figsize=(6, 3))
-plt.plot(history.history['loss'], label='Train Loss')
-plt.plot(history.history['val_loss'], label='Val Loss')
-plt.legend()
-plt.title("LSTM Training Progress")
+fig, ax = plt.subplots(figsize=(8, 4.5))
+epochs = range(1, len(history.history["loss"]) + 1)
+ax.plot(epochs, history.history["loss"], label="Training loss")
+ax.plot(epochs, history.history["val_loss"], label="Validation loss")
+ax.set_xlabel("Epoch")
+ax.set_ylabel("MSE loss on POD coefficients")
+ax.set_title("LSTM training and validation loss")
+ax.grid(True, alpha=0.3)
+ax.legend()
+fig.tight_layout()
+plt.savefig("docs/lstm_training.png", dpi=200, bbox_inches="tight")
 plt.show()
 
 # --- 4. PREDICTION & RECONSTRUCTION ---
@@ -227,8 +238,8 @@ def update(frame):
     return scat1, scat2
 
 ani = animation.FuncAnimation(fig, update, frames=len(predicted_coeffs), blit=False)
-ani.save('pod_lstm_forecast.gif', writer='pillow', fps=15)
-print("Done! GIF saved as 'pod_lstm_forecast.gif'")
+ani.save('docs/pod_lstm_forecast.gif', writer='pillow', fps=15)
+print("Done! GIF saved as 'docs/pod_lstm_forecast.gif'")
 
 # --- 1. LOAD DATA & MODES ---
 
@@ -330,17 +341,22 @@ print(f"Relative reconstruction error with {s} QR-pivoted sensors: {err_smart:.3
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
 
 scat1 = ax1.scatter(Coords[:,0], Coords[:,1], c=X_all[:, 150], cmap='jet', vmin=-1, vmax=1.5, s=5)
-ax1.set_title("Ground Truth")
+ax1.set_title("Ground truth (frame 150)")
+ax1.set_xlim([-1, 8]); ax1.set_ylim([-3, 3])
 ax1.set_aspect('equal')
+fig.colorbar(scat1, ax=ax1)
 
 scat2 = ax2.scatter(Coords[:,0], Coords[:,1], c=X_smart_rec, cmap='jet', vmin=-1, vmax=1.5, s=5)
 ax2.scatter(sensor_locs_qr[:,0], sensor_locs_qr[:,1], c='lime', s=150, marker='D', edgecolors='black', label='QR-pivoted sensors')
 ax2.legend(loc='upper right')
-ax2.set_title(f"Reconstruction from {s} QR-pivoted sensors")
+ax2.set_title(f"Reconstruction from {s} QR-pivoted sensors\nrelative error = {err_smart:.3%}")
+ax2.set_xlim([-1, 8]); ax2.set_ylim([-3, 3])
 ax2.set_aspect('equal')
+fig.colorbar(scat2, ax=ax2)
 
+fig.tight_layout()
+plt.savefig('docs/qr_reconstruction.png', dpi=200, bbox_inches='tight')
 plt.show()
-
 
 # --- SENSOR COUNT SWEEP ---
 print("Running sensor sweep (1 to 20)...")
@@ -369,13 +385,13 @@ plt.figure(figsize=(10, 6))
 plt.plot(sensor_counts, errors, 'bo-', linewidth=2)
 plt.axvline(x=r, color='r', linestyle='--', label=f'r = {r} modes')
 plt.title(f"Reconstruction error vs. number of sensors (r={r})")
-plt.xlabel("Number of sensors")
+plt.xlabel("Number of QR-pivoted sensors")
 plt.ylabel("Relative reconstruction error")
-plt.grid(True)
+plt.grid(True, which='both', alpha=0.3)
 plt.legend()
 plt.yscale('log')
+plt.savefig('docs/sensor_sweep.png', dpi=200, bbox_inches='tight')
 plt.show()
-
 
 # --- SENSOR-MATRIX CONDITIONING ---
 print("Checking sensor-matrix conditioning...")

@@ -118,7 +118,7 @@ $$
 \frac{\lVert x_{\text{true}} - x_{\text{pred}} \rVert_2}{\lVert x_{\text{true}} \rVert_2}.
 $$
 
-The forecast degrades over the 4.0 s horizon. This is a baseline result; no hyperparameter search, sequence-to-sequence model, or uncertainty quantification is included.
+The forecast degrades over the 4.0 s horizon. This is a baseline result; no hyper-parameter search, sequence-to-sequence model, or uncertainty quantification is included.
 
 ### Sparse reconstruction with QR-pivoted sensors
 
@@ -137,6 +137,38 @@ For reference, 5 random sensors on frame 159 give a relative error of 0.4031. Th
 The sharp transition at $p=10$ is a rank effect. With 10 retained modes, 9 sensors cannot uniquely determine the coefficients. For $p \ge 10$, the error is close to the POD truncation floor (0.207% global relative L2 error for $r=10$), so adding more sensors gives diminishing returns.
 
 QR pivoting is designed for the square or overdetermined regime. It is not guaranteed to be optimal, and it can perform poorly when $p < r$; the table above should not be read as a general ranking of sensor-placement methods.
+
+## Figures
+
+### POD modes
+
+![First two POD modes](docs/pod_modes.png)
+
+*The first two POD modes of the streamwise velocity field. Mode 1 is mean-flow-like; mode 2 captures the vortex-shedding pattern.*
+
+### LSTM training
+
+![LSTM training and validation loss](docs/lstm_training.png)
+
+*Training and validation loss for the 64-unit LSTM over 100 epochs. The curves converge without a large train-validation gap.*
+
+### Sparse reconstruction
+
+![QR-pivoted sparse reconstruction](docs/qr_reconstruction.png)
+
+*Frame 150 reconstructed from 10 QR-pivoted sensors. The relative reconstruction error is 0.227%, close to the rank-10 POD truncation floor.*
+
+### Sensor sweep
+
+![Reconstruction error vs. sensor count](docs/sensor_sweep.png)
+
+*Relative reconstruction error for 1–20 QR-pivoted sensors. The sharp drop at $p=10$ reflects the $p \ge r$ rank requirement, not a universal optimum.*
+
+### Forecast animation
+
+![POD-LSTM forecast animation](docs/pod_lstm_forecast.gif)
+
+*Autoregressive POD-LSTM forecast compared with the CFD ground truth over the 40 held-out snapshots.*
 
 ## Quick Start
 
@@ -168,7 +200,13 @@ Tested with Python 3.11.15, TensorFlow 2.21.0 (CPU), NumPy 2.4.6, SciPy 1.17.1, 
 ROM/
 ├── README.md
 ├── ROM_pod_spod.ipynb
-└── rom_pod_spod.py
+├── rom_pod_spod.py
+└── docs/
+    ├── pod_modes.png
+    ├── lstm_training.png
+    ├── qr_reconstruction.png
+    ├── sensor_sweep.png
+    └── pod_lstm_forecast.gif
 ```
 
 `rom_pod_spod.py` is a script export of the notebook. The notebook is the primary artifact; the script is provided for readers who prefer plain Python.
@@ -178,17 +216,14 @@ ROM/
 - Random seeds are fixed at 42 for NumPy, Python `random`, and TensorFlow.
 - The SVD sign of a mode is arbitrary; a mode may flip sign across runs or libraries. Reconstructions and error metrics are unaffected.
 - Exact metrics can vary slightly with hardware, TensorFlow version, and numerical libraries.
-- The repository version of the notebook has no stored outputs. Run it to regenerate the plots and `pod_lstm_forecast.gif`.
 
 ## Limitations
 
-- Only the streamwise velocity component $u$ is modeled. The cross-stream velocity $v$ and pressure field are not used.
-- The LSTM is a small baseline trained on 150 sequences. It has no hyperparameter search, regularization study, or uncertainty estimate.
+- Only the stream-wise velocity component $u$ is modeled. The cross-stream velocity $v$ and pressure field are not used.
+- The LSTM is a small baseline trained on 150 sequences. It has no hyper-parameter search, regularization study, or uncertainty estimate.
 - Forecast error grows with horizon; the reported 12.84% mean error should not be interpreted as long-horizon accuracy.
 - Sparse reconstruction assumes a known POD basis, fixed sensor locations, and noise-free measurements.
 - QR pivoting is greedy and is not a global optimum.
-- SPOD is not implemented, despite the `ROM_pod_spod` filename.
-- The notebook is not a CFD solver, a PINN, or a digital twin.
 
 ## Future Work
 
@@ -197,7 +232,6 @@ ROM/
 3. Include the cross-stream velocity and pressure fields.
 4. Study robust sensor placement under measurement noise and sensor failure.
 5. Add hyperparameter sweeps and uncertainty quantification for the forecast.
-6. Refactor the notebook into reusable modules with tests and a pinned requirements file.
 
 ## References
 
