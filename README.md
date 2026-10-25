@@ -139,6 +139,38 @@ The sharp transition at $p=10$ is a rank effect. With 10 retained modes, 9 senso
 
 QR pivoting is designed for the square or overdetermined regime. It is not guaranteed to be optimal, and it can perform poorly when $p < r$; the table above should not be read as a general ranking of sensor-placement methods.
 
+## Figures
+
+### POD modes
+
+![First two POD modes](docs/pod_modes.png)
+
+*The first two POD modes of the streamwise velocity field. Mode 1 is mean-flow-like; mode 2 captures the vortex-shedding pattern.*
+
+### LSTM training
+
+![LSTM training and validation loss](docs/lstm_training.png)
+
+*Training and validation loss for the 64-unit LSTM over 100 epochs. The curves converge without a large train-validation gap.*
+
+### Sparse reconstruction
+
+![QR-pivoted sparse reconstruction](docs/qr_reconstruction.png)
+
+*Frame 150 reconstructed from 10 QR-pivoted sensors. The relative reconstruction error is 0.227%, close to the rank-10 POD truncation floor.*
+
+### Sensor sweep
+
+![Reconstruction error vs. sensor count](docs/sensor_sweep.png)
+
+*Relative reconstruction error for 1–20 QR-pivoted sensors. The sharp drop at $p=10$ reflects the $p \ge r$ rank requirement, not a universal optimum.*
+
+### Forecast animation
+
+![POD-LSTM forecast animation](docs/pod_lstm_forecast.gif)
+
+*Autoregressive POD-LSTM forecast compared with the CFD ground truth over the 40 held-out snapshots.*
+
 ## Quick Start
 
 ### Option 1: Google Colab
@@ -169,7 +201,13 @@ Tested with Python 3.11.15, TensorFlow 2.21.0 (CPU), NumPy 2.4.6, SciPy 1.17.1, 
 ROM/
 ├── README.md
 ├── ROM_pod_spod.ipynb
-└── rom_pod_spod.py
+├── rom_pod_spod.py
+└── docs/
+    ├── pod_modes.png
+    ├── lstm_training.png
+    ├── qr_reconstruction.png
+    ├── sensor_sweep.png
+    └── pod_lstm_forecast.gif
 ```
 
 `rom_pod_spod.py` is a script export of the notebook. The notebook is the primary artifact; the script is provided for readers who prefer plain Python.
@@ -179,7 +217,7 @@ ROM/
 - Random seeds are fixed at 42 for NumPy, Python `random`, and TensorFlow.
 - The SVD sign of a mode is arbitrary; a mode may flip sign across runs or libraries. Reconstructions and error metrics are unaffected.
 - Exact metrics can vary slightly with hardware, TensorFlow version, and numerical libraries.
-- The repository version of the notebook has no stored outputs. Run it to regenerate the plots and `pod_lstm_forecast.gif`.
+- The repository version of the notebook has no stored outputs. Run it to regenerate `docs/*.png` and `docs/pod_lstm_forecast.gif`.
 - Dataset SHA-256: `99d9e1f9da7d2dff113ff2723373237b455e2de6c6747ac681846fe86fbba3d0`
 
 ## Limitations
